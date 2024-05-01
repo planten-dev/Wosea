@@ -1,4 +1,4 @@
-from PySide6.QtCore import Qt, QTimer, Slot
+from PySide6.QtCore import Qt, QTimer, Slot, QPoint
 from PySide6.QtWidgets import (
     QApplication,
     QWidget,
@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (
     QSystemTrayIcon,
     QMenu,
 )
-from PySide6.QtGui import QFont, QIcon
+from PySide6.QtGui import QFont, QIcon, QMouseEvent
 from enum import Enum, unique
 import rtoml as toml
 import time
@@ -34,8 +34,6 @@ class Clock(QWidget):
 
         self.move_to(Location.TOP_LEFT)
         self.timer.start(self.config["timer"]["frequency"])
-
-        self.show()
 
     def init_widget(self):
         self.layout = QVBoxLayout(self)
@@ -86,20 +84,38 @@ class Clock(QWidget):
                 )
 
     def load_config(self):
-        with open("config.toml") as fp:
+        with open("config.toml", "r", encoding="utf-8") as fp:
             self.config = toml.load(fp)
 
     def store_config(self):
-        toml.dump(self.config, "config.toml")
+        with open("config.toml", "w", encoding="utf-8") as fp:
+            toml.dump(self.config, fp)
 
     @Slot()
     def update_time(self):
         self.time_label.setText(time.strftime("%H:%M:%S"))
 
+    def mouseMoveEvent(self, event: QMouseEvent):
+        if self._tracking:
+            self._endPos = event.position().toPoint() - self._startPos
+            self.move(self.pos() + self._endPos)
+
+    def mouseReleaseEvent(self, event: QMouseEvent):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._tracking = False
+            self._startPos = None
+            self._endPos = None
+
+    def mousePressEvent(self, event: QMouseEvent):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._startPos = QPoint(event.position().x(), event.position().y())
+            self._tracking = True
+
 
 def main():
     app = QApplication(sys.argv)
     root = Clock()
+    root.show()
     sys.exit(app.exec())
 
 
