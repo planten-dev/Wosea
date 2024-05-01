@@ -12,6 +12,7 @@ from enum import Enum, unique
 import rtoml as toml
 import time
 import sys
+import images
 
 
 @unique
@@ -34,6 +35,7 @@ class Clock(QWidget):
 
         self.move_to(Location.TOP_LEFT)
         self.timer.start(self.config["timer"]["frequency"])
+        self.tray.show()
 
     def init_widget(self):
         self.layout = QVBoxLayout(self)
@@ -47,7 +49,7 @@ class Clock(QWidget):
 
     def init_tray_menu(self):
         self.tray = QSystemTrayIcon(self)
-        self.tray.setIcon(QIcon(":/icon.png"))
+        self.tray.setIcon(QIcon(":/icon.svg"))
         self.tray_menu = QMenu()
         # TODO: add menu items
         self.tray.setContextMenu(self.tray_menu)
