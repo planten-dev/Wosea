@@ -7,12 +7,12 @@ from PySide6.QtWidgets import (
     QSystemTrayIcon,
     QMenu,
 )
-from PySide6.QtGui import QFont, QIcon, QMouseEvent
+from PySide6.QtGui import QFont, QIcon, QMouseEvent, QAction
 from enum import Enum, unique
 import rtoml as toml
 import time
 import sys
-import images
+import images  # noqa: F401
 
 
 @unique
@@ -51,7 +51,12 @@ class Clock(QWidget):
         self.tray = QSystemTrayIcon(self)
         self.tray.setIcon(QIcon(":/icon.svg"))
         self.tray_menu = QMenu()
-        # TODO: add menu items
+
+        exit_action = QAction("&退出", self)
+        exit_action.triggered.connect(self.exit)
+
+        self.tray_menu.addAction(exit_action)
+
         self.tray.setContextMenu(self.tray_menu)
 
     def init_timer(self):
@@ -98,6 +103,8 @@ class Clock(QWidget):
         self.time_label.setText(time.strftime("%H:%M:%S"))
 
     def mouseMoveEvent(self, event: QMouseEvent):
+        if self.config["window"]["locked"]:
+            return
         if self._tracking:
             self._endPos = event.position().toPoint() - self._startPos
             self.move(self.pos() + self._endPos)
@@ -112,6 +119,19 @@ class Clock(QWidget):
         if event.button() == Qt.MouseButton.LeftButton:
             self._startPos = QPoint(event.position().x(), event.position().y())
             self._tracking = True
+
+    def mouseDoubleClickEvent(self, event: QMouseEvent):
+        self.config["window"]["locked"] = not self.config["window"]["locked"]
+
+        return super().mouseDoubleClickEvent(event)
+
+    def exit(self):
+        self.close()
+        # 默认窗口锁定不可修改
+        self.config["window"]["locked"] = True
+
+        self.store_config()
+        sys.exit(0)
 
 
 def main():

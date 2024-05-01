@@ -1,0 +1,11 @@
+[font]
+family = "Microsoft YaHei"
+size = 18
+
+[window]
+opacity = 0.8
+location = "top-left"
+locked = true
+
+[timer]
+frequency = 200
