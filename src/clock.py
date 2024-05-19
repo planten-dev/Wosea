@@ -211,6 +211,7 @@ class Clock(QWidget):
             QFont(self.config["font"]["family"], self.config["font"]["size"])
         )
         # 由于字体改动会导致窗口大小改变，所以需要重新调整窗口位置
+        self.setFixedSize(self.sizeHint())
         self.move_to(self.config["window"]["location"])
 
     def decress_font_size(self):
@@ -219,6 +220,7 @@ class Clock(QWidget):
             QFont(self.config["font"]["family"], self.config["font"]["size"])
         )
         # 由于字体改动会导致窗口大小改变，所以需要重新调整窗口位置
+        self.setFixedSize(self.sizeHint())
         self.move_to(self.config["window"]["location"])
 
     def reset_font_size(self):
