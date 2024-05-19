@@ -52,8 +52,36 @@ class Clock(QWidget):
         self.tray.setIcon(QIcon(":/icon.svg"))
         self.tray_menu = QMenu()
 
+        # 移动菜单
+        self.move_menu = QMenu("移动到", self)
+        move_top_left_action = QAction("&左上角", self)
+        move_top_left_action.triggered.connect(lambda: self.move_to(Location.TOP_LEFT))
+        move_top_right_action = QAction("&右上角", self)
+        move_top_right_action.triggered.connect(
+            lambda: self.move_to(Location.TOP_RIGHT)
+        )
+        move_bottom_left_action = QAction("&左下角", self)
+        move_bottom_left_action.triggered.connect(
+            lambda: self.move_to(Location.BOTTOM_LEFT)
+        )
+        move_bottom_right_action = QAction("&右下角", self)
+        move_bottom_right_action.triggered.connect(
+            lambda: self.move_to(Location.BOTTOM_RIGHT)
+        )
+        move_center_action = QAction("&居中", self)
+        move_center_action.triggered.connect(lambda: self.move_to(Location.CENTER))
+
+        self.move_menu.addAction(move_top_left_action)
+        self.move_menu.addAction(move_top_right_action)
+        self.move_menu.addAction(move_bottom_left_action)
+        self.move_menu.addAction(move_bottom_right_action)
+        self.move_menu.addAction(move_center_action)
+
+        self.tray_menu.addMenu(self.move_menu)
+
         exit_action = QAction("&退出", self)
         exit_action.triggered.connect(self.exit)
+        # TODO: 添加快捷键
 
         self.tray_menu.addAction(exit_action)
 
@@ -76,18 +104,18 @@ class Clock(QWidget):
             case Location.TOP_LEFT:
                 self.move(0, 0)
             case Location.TOP_RIGHT:
-                self.move(self.screen().width() - self.width(), 0)
+                self.move(self.screen().size().width() - self.width(), 0)
             case Location.BOTTOM_LEFT:
-                self.move(0, self.screen().height() - self.height())
+                self.move(0, self.screen().size().height() - self.height())
             case Location.BOTTOM_RIGHT:
                 self.move(
-                    self.screen().width() - self.width(),
-                    self.screen().height() - self.height(),
+                    self.screen().size().width() - self.width(),
+                    self.screen().size().height() - self.height(),
                 )
             case Location.CENTER:
                 self.move(
-                    self.screen().width() / 2 - self.width() / 2,
-                    self.screen().height() / 2 - self.height() / 2,
+                    self.screen().size().width() / 2 - self.width() / 2,
+                    self.screen().size().height() / 2 - self.height() / 2,
                 )
 
     def load_config(self):
