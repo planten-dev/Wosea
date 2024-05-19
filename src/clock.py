@@ -24,7 +24,22 @@ class Location(Enum):
     CENTER = 4
 
 
+@unique
+class Color(Enum):
+    RED = 0
+    GREEN = 1
+    BLUE = 2
+    YELLOW = 3
+    PURPLE = 4
+    ORANGE = 5
+    WHITE = 6
+    PINK = 7
+    BLACK = 8
+
+
 class Clock(QWidget):
+    exam_mode = False
+
     def __init__(self):
         super().__init__()
         self.load_config()
@@ -33,8 +48,6 @@ class Clock(QWidget):
         self.init_timer()
         self.init_window_attributes()
 
-        self.move_to(Location.TOP_LEFT)
-        self.timer.start(self.config["timer"]["frequency"])
         self.tray.show()
 
     def init_widget(self):
@@ -106,6 +119,48 @@ class Clock(QWidget):
 
         self.tray_menu.addMenu(self.font_menu)
 
+        # 字体颜色菜单
+        self.font_color_menu = QMenu("字体颜色调整", self)
+        red_action = QAction("&红色", self)
+        red_action.triggered.connect(lambda: self.set_font_color(Color.RED))
+        green_action = QAction("&绿色", self)
+        green_action.triggered.connect(lambda: self.set_font_color(Color.GREEN))
+        blue_action = QAction("&蓝色", self)
+        blue_action.triggered.connect(lambda: self.set_font_color(Color.BLUE))
+        yellow_action = QAction("&黄色", self)
+        yellow_action.triggered.connect(lambda: self.set_font_color(Color.YELLOW))
+        purple_action = QAction("&紫色", self)
+        purple_action.triggered.connect(lambda: self.set_font_color(Color.PURPLE))
+        orange_action = QAction("&橙色", self)
+        orange_action.triggered.connect(lambda: self.set_font_color(Color.ORANGE))
+        white_action = QAction("&白色", self)
+        white_action.triggered.connect(lambda: self.set_font_color(Color.WHITE))
+        pink_action = QAction("&粉色", self)
+        pink_action.triggered.connect(lambda: self.set_font_color(Color.PINK))
+        black_action = QAction("&黑色", self)
+        black_action.triggered.connect(lambda: self.set_font_color(Color.BLACK))
+        reset_action = QAction("&重置", self)
+        reset_action.triggered.connect(lambda: self.set_font_color(Color.BLACK))
+
+        self.font_color_menu.addAction(red_action)
+        self.font_color_menu.addAction(green_action)
+        self.font_color_menu.addAction(blue_action)
+        self.font_color_menu.addAction(yellow_action)
+        self.font_color_menu.addAction(purple_action)
+        self.font_color_menu.addAction(orange_action)
+        self.font_color_menu.addAction(white_action)
+        self.font_color_menu.addAction(pink_action)
+        self.font_color_menu.addAction(black_action)
+        self.font_color_menu.addAction(reset_action)
+
+        self.tray_menu.addMenu(self.font_color_menu)
+
+        # 考试模式
+        exam_action = QAction("&考试模式", self)
+        exam_action.triggered.connect(lambda: self.set_exam_mode(True))
+
+        self.tray_menu.addAction(exam_action)
+
         # 退出菜单
         exit_action = QAction("&退出", self)
         exit_action.triggered.connect(self.exit)
@@ -117,6 +172,7 @@ class Clock(QWidget):
     def init_timer(self):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_time)
+        self.timer.start(self.config["timer"]["frequency"])
 
     def init_window_attributes(self):
         self.setWindowOpacity(self.config["window"]["opacity"])
@@ -125,6 +181,38 @@ class Clock(QWidget):
             | Qt.WindowType.FramelessWindowHint
             | Qt.WindowType.Tool
         )
+
+        match self.config["window"]["location"]:
+            case "top-left":
+                self.move_to(Location.TOP_LEFT)
+            case "top-right":
+                self.move_to(Location.TOP_RIGHT)
+            case "bottom-left":
+                self.move_to(Location.BOTTOM_LEFT)
+            case "bottom-right":
+                self.move_to(Location.BOTTOM_RIGHT)
+            case "center":
+                self.move_to(Location.CENTER)
+
+        match self.config["font"]["color"]:
+            case "red":
+                self.set_font_color(Color.RED)
+            case "green":
+                self.set_font_color(Color.GREEN)
+            case "blue":
+                self.set_font_color(Color.BLUE)
+            case "yellow":
+                self.set_font_color(Color.YELLOW)
+            case "purple":
+                self.set_font_color(Color.PURPLE)
+            case "orange":
+                self.set_font_color(Color.ORANGE)
+            case "white":
+                self.set_font_color(Color.WHITE)
+            case "pink":
+                self.set_font_color(Color.PINK)
+            case "black":
+                self.set_font_color(Color.BLACK)
 
     def move_to(self, location: Location):
         match location:
@@ -160,7 +248,7 @@ class Clock(QWidget):
 
     @Slot()
     def update_time(self):
-        self.time_label.setText(time.strftime("%H:%M:%S"))
+        self.time_label.setText(time.strftime(self.config["timer"]["template"]))
 
     def mouseMoveEvent(self, event: QMouseEvent):
         if self.config["window"]["locked"]:
@@ -189,6 +277,8 @@ class Clock(QWidget):
         self.close()
         # 默认窗口锁定不可修改
         self.config["window"]["locked"] = True
+        # 考试模式一次性
+        self.set_exam_mode(False)
 
         self.store_config()
         sys.exit(0)
@@ -231,6 +321,53 @@ class Clock(QWidget):
         # 由于字体改动会导致窗口大小改变，所以需要重新调整窗口位置
         self.setFixedSize(self.sizeHint())
         self.move_to(self.config["window"]["location"])
+
+    def set_font_color(self, color: Color):
+        match color:
+            case Color.RED:
+                self.config["font"]["color"] = "red"
+                self.time_label.setStyleSheet("color: red;")
+            case Color.GREEN:
+                self.config["font"]["color"] = "green"
+                self.time_label.setStyleSheet("color: green;")
+            case Color.BLUE:
+                self.config["font"]["color"] = "blue"
+                self.time_label.setStyleSheet("color: blue;")
+            case Color.YELLOW:
+                self.config["font"]["color"] = "yellow"
+                self.time_label.setStyleSheet("color: yellow;")
+            case Color.PURPLE:
+                self.config["font"]["color"] = "purple"
+                self.time_label.setStyleSheet("color: purple;")
+            case Color.ORANGE:
+                self.config["font"]["color"] = "orange"
+                self.time_label.setStyleSheet("color: orange;")
+            case Color.WHITE:
+                self.config["font"]["color"] = "white"
+                self.time_label.setStyleSheet("color: white;")
+            case Color.PINK:
+                self.config["font"]["color"] = "pink"
+                self.time_label.setStyleSheet("color: pink;")
+            case Color.BLACK:
+                self.config["font"]["color"] = "black"
+                self.time_label.setStyleSheet("color: black;")
+
+    def set_exam_mode(self, mode: bool):
+        if self.exam_mode == mode:
+            return
+        if mode:
+            self.exam_mode = True
+            self.config["timer"]["template"] = (
+                "当前时间:\n"
+                + self.config["timer"]["template"]
+                + "\n\n端正考风,严肃考纪\n振奋精神,考出水平"
+            )
+            self.time_label.setFont(QFont(self.config["font"]["family"], 50))
+            self.time_label.setStyleSheet("color: black;")
+            self.setWindowOpacity(1.0)
+        else:
+            self.exam_mode = False
+            self.config["timer"]["template"] = "%H:%M:%S"
 
 
 def main():

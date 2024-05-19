@@ -1,11 +1,13 @@
 [font]
 family = "Microsoft YaHei"
 size = 18
+color = "black"
 
 [window]
 opacity = 0.8
-location = "top-left"
+location = "center"
 locked = true
 
 [timer]
 frequency = 200
+template = "%H:%M:%S"
