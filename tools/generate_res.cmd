@@ -1,0 +1,1 @@
+pyside6-rcc.exe resource\resourcec.qrc -o src/images.py
