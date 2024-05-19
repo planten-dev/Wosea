@@ -79,9 +79,21 @@ class Clock(QWidget):
 
         self.tray_menu.addMenu(self.move_menu)
 
+        # 透明度菜单
+        self.opacity_menu = QMenu("透明度调整", self)
+        incress_opacity_action = QAction("&增加", self)
+        incress_opacity_action.triggered.connect(self.incress_opacity)
+        decress_opacity_action = QAction("&减少", self)
+        decress_opacity_action.triggered.connect(self.decress_opacity)
+
+        self.opacity_menu.addAction(incress_opacity_action)
+        self.opacity_menu.addAction(decress_opacity_action)
+
+        self.tray_menu.addMenu(self.opacity_menu)
+
+        # 退出菜单
         exit_action = QAction("&退出", self)
         exit_action.triggered.connect(self.exit)
-        # TODO: 添加快捷键
 
         self.tray_menu.addAction(exit_action)
 
@@ -160,6 +172,18 @@ class Clock(QWidget):
 
         self.store_config()
         sys.exit(0)
+
+    def incress_opacity(self):
+        if self.config["window"]["opacity"] >= 1.0:
+            return
+        self.setWindowOpacity(self.config["window"]["opacity"] + 0.1)
+        self.config["window"]["opacity"] += 0.1
+
+    def decress_opacity(self):
+        if self.config["window"]["opacity"] <= 0.0:
+            return
+        self.setWindowOpacity(self.config["window"]["opacity"] - 0.1)
+        self.config["window"]["opacity"] -= 0.1
 
 
 def main():
