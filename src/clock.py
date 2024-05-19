@@ -91,6 +91,21 @@ class Clock(QWidget):
 
         self.tray_menu.addMenu(self.opacity_menu)
 
+        # 字体菜单
+        self.font_menu = QMenu("字体调整", self)
+        incress_font_size_action = QAction("&增加", self)
+        incress_font_size_action.triggered.connect(self.incress_font_size)
+        decress_font_size_action = QAction("&减少", self)
+        decress_font_size_action.triggered.connect(self.decress_font_size)
+        reset_font_size_action = QAction("&重置", self)
+        reset_font_size_action.triggered.connect(self.reset_font_size)
+
+        self.font_menu.addAction(incress_font_size_action)
+        self.font_menu.addAction(decress_font_size_action)
+        self.font_menu.addAction(reset_font_size_action)
+
+        self.tray_menu.addMenu(self.font_menu)
+
         # 退出菜单
         exit_action = QAction("&退出", self)
         exit_action.triggered.connect(self.exit)
@@ -115,20 +130,25 @@ class Clock(QWidget):
         match location:
             case Location.TOP_LEFT:
                 self.move(0, 0)
+                self.config["window"]["location"] = "top-left"
             case Location.TOP_RIGHT:
                 self.move(self.screen().size().width() - self.width(), 0)
+                self.config["window"]["location"] = "top-right"
             case Location.BOTTOM_LEFT:
                 self.move(0, self.screen().size().height() - self.height())
+                self.config["window"]["location"] = "bottom-left"
             case Location.BOTTOM_RIGHT:
                 self.move(
                     self.screen().size().width() - self.width(),
                     self.screen().size().height() - self.height(),
                 )
+                self.config["window"]["location"] = "bottom-right"
             case Location.CENTER:
                 self.move(
                     self.screen().size().width() / 2 - self.width() / 2,
                     self.screen().size().height() / 2 - self.height() / 2,
                 )
+                self.config["window"]["location"] = "center"
 
     def load_config(self):
         with open("config.toml", "r", encoding="utf-8") as fp:
@@ -184,6 +204,31 @@ class Clock(QWidget):
             return
         self.setWindowOpacity(self.config["window"]["opacity"] - 0.1)
         self.config["window"]["opacity"] -= 0.1
+
+    def incress_font_size(self):
+        self.config["font"]["size"] += 5
+        self.time_label.setFont(
+            QFont(self.config["font"]["family"], self.config["font"]["size"])
+        )
+        # 由于字体改动会导致窗口大小改变，所以需要重新调整窗口位置
+        self.move_to(self.config["window"]["location"])
+
+    def decress_font_size(self):
+        self.config["font"]["size"] -= 5
+        self.time_label.setFont(
+            QFont(self.config["font"]["family"], self.config["font"]["size"])
+        )
+        # 由于字体改动会导致窗口大小改变，所以需要重新调整窗口位置
+        self.move_to(self.config["window"]["location"])
+
+    def reset_font_size(self):
+        self.config["font"]["size"] = 18
+        self.time_label.setFont(
+            QFont(self.config["font"]["family"], self.config["font"]["size"])
+        )
+        # 由于字体改动会导致窗口大小改变，所以需要重新调整窗口位置
+        self.setFixedSize(self.sizeHint())
+        self.move_to(self.config["window"]["location"])
 
 
 def main():
