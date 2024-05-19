@@ -1,10 +1,10 @@
 [setting]
-mode = "number" # or "name" (need to specify name_list)
+mode = "number" # 或者 "name" 模式(需要配置name_list)
 
 [data]
 begin = 1
 end = 50
-name_list = [] # please get touch with developer if you want to use this feature
+name_list = [] # 使用此功能前需设置mode为"name"
 
 [style.font]
 family = "Microsoft YaHei"
