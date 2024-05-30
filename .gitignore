@@ -1,3 +1,6 @@
 venv/
 src/images.py
 src/__pycache__
+src/UI*
+output/
+*.exe
